@@ -56,8 +56,9 @@ public final class TableEntryCodec
         // Timeout.
         if (piTableEntry.timeout().isPresent()) {
             // FIXME: timeout is supported in P4Runtime v1.0
-            log.warn("Found PI table entry with timeout set, " +
-                             "not supported in P4Runtime: {}", piTableEntry);
+            tableEntryMsgBuilder.setIdleTimeoutNs((long)(piTableEntry.timeout().get() * 1000 * 1000 * 1000));
+//            log.warn("Found PI table entry with timeout set, " +
+//                             "not supported in P4Runtime: {}", piTableEntry);
         }
         // Table action.
         if (piTableEntry.action() != null) {
@@ -142,6 +143,10 @@ public final class TableEntryCodec
         // Timeout.
         // FIXME: how to decode table entry messages with timeout, given that
         //  the timeout value is lost after encoding?
+        if (message.getIdleTimeoutNs() > 0) {
+            piTableEntryBuilder.withTimeout(((double) message.getIdleTimeoutNs() / (1000 * 1000 * 1000)));
+        }
+
 
         // Match key for field matches.
         piTableEntryBuilder.withMatchKey(
